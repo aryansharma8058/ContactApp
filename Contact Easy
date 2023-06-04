@@ -1,0 +1,101 @@
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import PopupDialog, { SlideAnimation } from 'react-native-popup-dialog';
+
+const contactsData = [
+  { id: 1, name: 'Arjun', number: '1234567890' },
+  { id: 2, name: 'John', number: '9876543210' },
+  { id: 3, name: 'Jane', number: '5678901234' },
+  // Add more contacts as needed
+];
+
+const slideAnimation = new SlideAnimation({
+  slideFrom: 'bottom',
+});
+
+const App = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [contacts, setContacts] = useState([]);
+  const [selectedContact, setSelectedContact] = useState(null);
+
+  useEffect(() => {
+    // Simulating fetching contacts from the phone
+    setContacts(contactsData);
+  }, []);
+
+  const handleSearch = (text) => {
+    setSearchQuery(text);
+    const filteredContacts = contactsData.filter((contact) =>
+      contact.name.toLowerCase().includes(text.toLowerCase())
+    );
+    setContacts(filteredContacts);
+  };
+
+  const handleContactPress = (contact) => {
+    setSelectedContact(contact);
+    slideAnimation.slideFrom = 'bottom';
+    popupDialog.show();
+  };
+
+  return (
+    <View style={styles.container}>
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Search..."
+        value={searchQuery}
+        onChangeText={handleSearch}
+      />
+      <FlatList
+        data={contacts}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => handleContactPress(item)}>
+            <View style={styles.contactItem}>
+              <Text style={styles.contactName}>{item.name}</Text>
+              <Text style={styles.contactNumber}>{item.number}</Text>
+            </View>
+          </TouchableOpacity>
+        )}
+      />
+      <PopupDialog
+        ref={(popupDialog) => (this.popupDialog = popupDialog)}
+        dialogAnimation={slideAnimation}
+        dialogStyle={styles.popupDialog}
+      >
+        <View>
+          {selectedContact && (
+            <View>
+              <Text style={styles.selectedContactName}>{selectedContact.name}</Text>
+              <Text style={styles.selectedContactNumber}>{selectedContact.number}</Text>
+              <TouchableOpacity onPress={() => popupDialog.dismiss()}>
+                <Text style={styles.dismissText}>Dismiss</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+      </PopupDialog>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+  searchInput: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 4,
+    marginBottom: 16,
+    paddingHorizontal: 8,
+  },
+  contactItem: {
+    marginBottom: 8,
+  },
+  contactName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  contactNumber:
